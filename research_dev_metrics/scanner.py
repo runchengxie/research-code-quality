@@ -60,6 +60,7 @@ class ScanResult:
     tests_over_1000: int
     largest_files: list[FileMetric]
     largest_functions: list[FunctionMetric]
+    functions: list[FunctionMetric]
 
     def to_payload(self) -> dict[str, object]:
         payload = asdict(self)
@@ -252,6 +253,7 @@ def scan_repository(
         largest_functions=sorted(
             function_metrics, key=lambda item: item.lines, reverse=True
         )[:limit],
+        functions=function_metrics,
     )
 
 
