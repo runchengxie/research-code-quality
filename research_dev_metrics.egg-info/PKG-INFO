@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: research-dev-metrics
-Version: 0.1.1
+Version: 0.1.2
 Summary: Shared static-analysis algorithm for research-workspace maintainability metric scripts
 Requires-Python: >=3.12
 Description-Content-Type: text/markdown
