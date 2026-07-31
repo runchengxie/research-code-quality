@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "research-dev-metrics"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared static-analysis algorithm for research-workspace maintainability metric scripts"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -16,10 +16,10 @@ dev = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "research_dev_metrics"}
+package-dir = {"" = "."}
 
 [tool.setuptools.packages.find]
-where = ["research_dev_metrics"]
+where = ["."]
 include = ["research_dev_metrics", "research_dev_metrics.*"]
 
 [tool.ruff]
