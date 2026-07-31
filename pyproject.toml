@@ -7,7 +7,7 @@ name = "research-dev-metrics"
 version = "0.1.2"
 description = "Shared static-analysis algorithm for research-workspace maintainability metric scripts"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
