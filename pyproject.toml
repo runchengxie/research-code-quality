@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "research-dev-metrics"
+version = "0.1.0"
+description = "Shared static-analysis algorithm for research-workspace maintainability metric scripts"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8",
+]
+
+[tool.setuptools]
+package-dir = {"" = "research_dev_metrics"}
+
+[tool.setuptools.packages.find]
+where = ["research_dev_metrics"]
+include = ["research_dev_metrics", "research_dev_metrics.*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "RET", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
