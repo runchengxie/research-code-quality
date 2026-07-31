@@ -135,14 +135,23 @@ def _is_included_python_path(path: Path, roots: Sequence[str]) -> bool:
 def discover_python_files(
     repo_root: Path,
     roots: Sequence[str] = DEFAULT_ROOTS,
+    use_git: bool = True,
 ) -> list[Path]:
-    tracked = _git_tracked_python(repo_root)
-    if tracked is not None:
-        return sorted(
-            repo_root / path
-            for path in tracked
-            if _is_included_python_path(Path(path), roots) and (repo_root / path).is_file()
-        )
+    """Return sorted Python files under ``roots``.
+
+    When ``use_git`` is true and ``repo_root`` is a git checkout, files are taken
+    from ``git ls-files`` (respects ``.gitignore`` and includes untracked files).
+    Set ``use_git=False`` for repos that intentionally scan the working tree with
+    plain ``rglob`` (for example ``quant-execution-engine``).
+    """
+    if use_git:
+        tracked = _git_tracked_python(repo_root)
+        if tracked is not None:
+            return sorted(
+                repo_root / path
+                for path in tracked
+                if _is_included_python_path(Path(path), roots) and (repo_root / path).is_file()
+            )
     files: list[Path] = []
     for root_name in roots:
         root = repo_root / root_name
@@ -196,6 +205,7 @@ def scan_repository(
     repo_root: Path,
     roots: Sequence[str] = DEFAULT_ROOTS,
     limit: int = 10,
+    use_git: bool = True,
 ) -> ScanResult:
     """Run the shared static scan and return base metrics plus raw lists.
 
@@ -203,7 +213,7 @@ def scan_repository(
     ``command_run_functions_over_150``) to the returned ``ScanResult`` before
     assembling their submodule-specific ``Metrics`` dataclass.
     """
-    files = discover_python_files(repo_root, roots)
+    files = discover_python_files(repo_root, roots, use_git=use_git)
     file_metrics: list[FileMetric] = []
     function_metrics: list[FunctionMetric] = []
     total_lines = 0
@@ -251,7 +261,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     parser.add_argument(
-        "--markdown", action="store_true", help="Print a markdown table suitable for maintenance docs."
+        "--markdown",
+        action="store_true",
+        help="Print a markdown table suitable for maintenance docs.",
     )
     parser.add_argument(
         "--limit", type=int, default=10, help="Number of largest files/functions to include."
@@ -264,6 +276,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         choices=DEFAULT_ROOTS,
         help="Root to include. May be repeated. Defaults to src, scripts, tests.",
+    )
+    parser.add_argument(
+        "--no-git",
+        action="store_true",
+        help="Scan the working tree with rglob instead of git ls-files.",
     )
     parser.add_argument(
         "--ratchet", action="store_true", help="Fail if maintainability debt exceeds budget."
@@ -285,7 +302,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     roots = tuple(args.scope or DEFAULT_ROOTS)
     repo_root = args.root or find_repo_root(Path(__file__))
-    result = scan_repository(repo_root.resolve(), roots, max(args.limit, 0))
+    result = scan_repository(
+        repo_root.resolve(), roots, max(args.limit, 0), use_git=not args.no_git
+    )
     if args.json:
         json.dump(result.to_payload(), sys.stdout, indent=2, ensure_ascii=False)
         print()
