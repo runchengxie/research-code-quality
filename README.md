@@ -52,5 +52,9 @@ result = scan_repository(repo_root, roots, limit)
 
 ```bash
 uv run --group dev ruff check .
-uv run --group dev python -m research_dev_metrics.scanner --json
+uv run --group dev python -m research_dev_metrics.scanner \
+  --scope research_dev_metrics --scope tests --json
 ```
+
+scanner 默认扫描 `src`、`scripts`、`tests`，以兼容使用本仓库算法的研究子模块。
+本仓库自身采用根目录包布局，因此校验命令显式指定 `research_dev_metrics` 和 `tests`。

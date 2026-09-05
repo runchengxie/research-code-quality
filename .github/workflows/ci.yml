@@ -29,5 +29,10 @@ jobs:
       - name: Run Ruff checks
         run: uv run --locked --extra dev ruff check .
 
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
       - name: Run repository scanner
-        run: uv run --locked --extra dev python -m research_dev_metrics.scanner --json
+        run: >-
+          uv run --locked --extra dev python -m research_dev_metrics.scanner
+          --scope research_dev_metrics --scope tests --json

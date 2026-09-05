@@ -278,8 +278,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--scope",
         action="append",
-        choices=DEFAULT_ROOTS,
-        help="Root to include. May be repeated. Defaults to src, scripts, tests.",
+        help=(
+            "Relative repository directory to include. May be repeated. "
+            "Defaults to src, scripts, tests."
+        ),
     )
     parser.add_argument(
         "--no-git",
