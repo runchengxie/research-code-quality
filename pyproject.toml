@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "research-dev-metrics"
+name = "research-code-quality"
 version = "0.1.2"
 description = "Shared static-analysis algorithm for research-workspace maintainability metric scripts"
 readme = "README.md"
@@ -20,7 +20,7 @@ package-dir = {"" = "."}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["research_dev_metrics", "research_dev_metrics.*"]
+include = ["research_code_quality", "research_code_quality.*"]
 
 [tool.ruff]
 target-version = "py312"

@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from research_dev_metrics.scanner import (
+from research_code_quality.scanner import (
     DEFAULT_ROOTS,
     discover_python_files,
     parse_args,
@@ -10,20 +10,20 @@ from research_dev_metrics.scanner import (
 
 class ScannerScopeTests(unittest.TestCase):
     def test_explicit_scopes_accept_multiple_repository_directories(self):
-        args = parse_args(["--scope", "research_dev_metrics", "--scope", "tests"])
+        args = parse_args(["--scope", "research_code_quality", "--scope", "tests"])
 
-        self.assertEqual(args.scope, ["research_dev_metrics", "tests"])
+        self.assertEqual(args.scope, ["research_code_quality", "tests"])
 
     def test_explicit_package_scope_discovers_this_repository_code(self):
         repo_root = Path(__file__).resolve().parents[1]
 
         files = discover_python_files(
             repo_root,
-            roots=("research_dev_metrics",),
+            roots=("research_code_quality",),
             use_git=True,
         )
 
-        self.assertIn(repo_root / "research_dev_metrics/scanner.py", files)
+        self.assertIn(repo_root / "research_code_quality/scanner.py", files)
 
     def test_default_scopes_remain_compatible_with_downstream_repositories(self):
         self.assertEqual(DEFAULT_ROOTS, ("src", "scripts", "tests"))

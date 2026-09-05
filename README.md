@@ -1,4 +1,4 @@
-# research-dev-metrics
+# research-code-quality
 
 research-workspace 子模块共享的静态可维护性指标扫描算法。
 
@@ -35,14 +35,14 @@ research-workspace 子模块共享的静态可维护性指标扫描算法。
 ```toml
 [project.optional-dependencies]
 dev = [
-    "research-dev-metrics = { git = \"https://github.com/runchengxie/research-dev-metrics.git\" }",
+    "research-code-quality = { git = \"https://github.com/runchengxie/research-code-quality.git\" }",
 ]
 ```
 
 本地包装器只需：
 
 ```python
-from research_dev_metrics.scanner import scan_repository
+from research_code_quality.scanner import scan_repository
 
 result = scan_repository(repo_root, roots, limit)
 # 再补上本仓专属指标，组装出与原来一致的 Metrics 对象
@@ -52,9 +52,9 @@ result = scan_repository(repo_root, roots, limit)
 
 ```bash
 uv run --group dev ruff check .
-uv run --group dev python -m research_dev_metrics.scanner \
-  --scope research_dev_metrics --scope tests --json
+uv run --group dev python -m research_code_quality.scanner \
+  --scope research_code_quality --scope tests --json
 ```
 
 scanner 默认扫描 `src`、`scripts`、`tests`，以兼容使用本仓库算法的研究子模块。
-本仓库自身采用根目录包布局，因此校验命令显式指定 `research_dev_metrics` 和 `tests`。
+本仓库自身采用根目录包布局，因此校验命令显式指定 `research_code_quality` 和 `tests`。

@@ -34,5 +34,5 @@ jobs:
 
       - name: Run repository scanner
         run: >-
-          uv run --locked --extra dev python -m research_dev_metrics.scanner
-          --scope research_dev_metrics --scope tests --json
+          uv run --locked --extra dev python -m research_code_quality.scanner
+          --scope research_code_quality --scope tests --json
