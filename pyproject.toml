@@ -10,6 +10,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.scripts]
+research-code-quality = "research_code_quality.scanner:main"
+
 [project.optional-dependencies]
 dev = [
     "ruff>=0.8",
