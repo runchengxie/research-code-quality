@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "research-code-quality"
-version = "0.1.3"
+version = "0.2.0"
 description = "Shared static-analysis algorithm for research-workspace maintainability metric scripts"
 readme = "README.md"
 requires-python = ">=3.10"

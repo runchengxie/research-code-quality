@@ -29,6 +29,18 @@ from pathlib import Path
 
 PYPROJECT_PATH = Path("pyproject.toml")
 DEFAULT_ROOTS = ("src", "scripts", "tests")
+RATCHET_METRICS = (
+    "python_files",
+    "python_lines",
+    "long_lines_over_100",
+    "functions_over_100",
+    "functions_over_250",
+    "functions_over_500",
+    "c901_file_ignores",
+    "files_over_800",
+    "files_over_1200",
+    "tests_over_1000",
+)
 
 
 @dataclass(frozen=True)
@@ -79,6 +91,47 @@ class ScanResult:
             "large_test_file_lines": 1000,
         }
         return payload
+
+
+def ratchet_metrics(result: ScanResult) -> dict[str, int]:
+    """Return the stable scalar metrics suitable for a committed baseline."""
+    return {name: getattr(result, name) for name in RATCHET_METRICS}
+
+
+def ratchet_violations(result: ScanResult, baseline: dict[str, object]) -> list[str]:
+    """Return human-readable regressions against a baseline payload."""
+    metrics = baseline.get("metrics", baseline)
+    if not isinstance(metrics, dict):
+        raise ValueError("baseline must contain a 'metrics' object")
+    violations: list[str] = []
+    current = ratchet_metrics(result)
+    for name, value in current.items():
+        previous = metrics.get(name)
+        if previous is None:
+            continue
+        if not isinstance(previous, int):
+            raise ValueError(f"baseline metric {name!r} must be an integer")
+        if value > previous:
+            violations.append(f"{name}: {value} > baseline {previous}")
+    return violations
+
+
+def load_baseline(path: Path) -> dict[str, object]:
+    """Load a JSON baseline file."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("baseline must be a JSON object")
+    return payload
+
+
+def write_baseline(path: Path, result: ScanResult) -> None:
+    """Write a compact, reviewable baseline containing only ratchet metrics."""
+    payload = {
+        "schema_version": 1,
+        "roots": result.roots,
+        "metrics": ratchet_metrics(result),
+    }
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def find_repo_root(start: Path) -> Path:
@@ -295,6 +348,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ratchet", action="store_true", help="Fail if maintainability debt exceeds budget."
     )
+    parser.add_argument(
+        "--baseline", type=Path, help="JSON baseline used by --ratchet."
+    )
+    parser.add_argument(
+        "--write-baseline", type=Path, help="Write the current scalar metrics as a JSON baseline."
+    )
     return parser
 
 
@@ -315,6 +374,22 @@ def main(argv: list[str] | None = None) -> int:
     result = scan_repository(
         repo_root.resolve(), roots, max(args.limit, 0), use_git=not args.no_git
     )
+    if args.write_baseline:
+        write_baseline(args.write_baseline, result)
+    if args.ratchet:
+        if args.baseline is None:
+            print("--ratchet requires --baseline", file=sys.stderr)
+            return 2
+        try:
+            violations = ratchet_violations(result, load_baseline(args.baseline))
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            print(f"Unable to read baseline: {error}", file=sys.stderr)
+            return 2
+        if violations:
+            print("Maintainability ratchet failed:", file=sys.stderr)
+            for violation in violations:
+                print(f"- {violation}", file=sys.stderr)
+            return 1
     if args.json:
         json.dump(result.to_payload(), sys.stdout, indent=2, ensure_ascii=False)
         print()
